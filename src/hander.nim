@@ -21,5 +21,5 @@ proc hander*(name: string, callback: proc(
       let _ = resClient.postContent(returnUrl & "/response", body = $result)
     except:
       let _ = resClient.postContent(returnUrl & "/error", body = ${
-        "mag": "Internal Lambda Error"
-      })
+          "msg": "Internal Lambda Error"
+        })

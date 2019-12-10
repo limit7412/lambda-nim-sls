@@ -4,5 +4,5 @@ import json
 when isMainModule:
   "test".hander do (event: JsonNode) -> JsonNode:
     return %*{
-      "mag": "大石泉すき"
+      "msg": "大石泉すき"
     }
