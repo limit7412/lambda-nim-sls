@@ -30,14 +30,6 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@master
 
-    - name: get env
-      run: |
-        aws s3 cp s3://limit7412-workflow-env/lambda_nim_sls/dev/env.yml .
-
-    - name: get secret
-      run: |
-        aws s3 cp s3://limit7412-workflow-env/lambda_nim_sls/dev/secret.json .
-
     - name: build and push ecr
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
