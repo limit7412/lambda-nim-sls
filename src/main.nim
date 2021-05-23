@@ -1,5 +1,5 @@
-import hander
 import json
+import runtime/lambda
 
 when isMainModule:
   "test".hander do (event: JsonNode) -> JsonNode:
