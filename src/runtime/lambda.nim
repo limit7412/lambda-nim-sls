@@ -1,5 +1,5 @@
 import os
-import httpclient
+import httpClient
 import json
 
 proc hander*(name: string, callback: proc(e: JsonNode): JsonNode) =
