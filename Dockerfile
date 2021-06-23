@@ -7,8 +7,8 @@ RUN nimble build --passL:-static -d:release
 RUN mv main bootstrap
 RUN chmod +x bootstrap
 
-FROM amazon/aws-lambda-provided:al2
+FROM public.ecr.aws/lambda/provided:al2
 
-COPY --from=build-image /work/ /var/runtime/
+COPY --from=build-image /work/bootstrap /var/runtime/
 
 CMD ["dummyHandler"]
