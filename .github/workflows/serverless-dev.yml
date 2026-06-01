@@ -20,6 +20,10 @@ jobs:
       - name: checkout
         uses: actions/checkout@v1
 
+      # serverless-plugin-scripts（bootstrap の静的ビルドに使用）を取得する
+      - name: install plugins
+        run: npm install
+
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

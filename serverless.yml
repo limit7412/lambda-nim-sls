@@ -1,29 +1,73 @@
 service: lambda-nim-sls
 
+plugins:
+  - serverless-plugin-scripts
+
 custom:
   defaultStage: dev
+  scripts:
+    hooks:
+      # sls deploy / sls package 時に bootstrap を静的ビルドする。
+      # macOS / Apple Silicon でも Lambda(provided.al2, x86_64) 互換の
+      # 静的バイナリを得るため、linux/amd64 を明示して Docker でビルドする。
+      # chmod はコンテナ内(root)で実行する。Linux ランナーでは生成物が
+      # root 所有になり、コンテナ外の runner ユーザーでは chmod できないため。
+      'before:package:createDeploymentArtifacts': |
+        docker run --rm --platform linux/amd64 -v "$PWD":/work -w /work nimlang/nim:latest \
+          sh -c "nimble build -y --passL:-static -d:release && mv main bootstrap && chmod +x bootstrap"
 
 provider:
   name: aws
-  runtime: provided
+  runtime: provided.al2
   timeout: 20
   region: ap-northeast-1
-  ecr:
-    images:
-      appImage:
-        path: ./
-        platform: linux/amd64
   stage: ${opt:stage, self:custom.defaultStage}
   # environment:
   #   ${file(./env.yml)}
 
+package:
+  patterns:
+    - '!./**'
+    - bootstrap
+
 functions:
+  # provided ランタイムはパッケージ直下の bootstrap を実行する。
+  # handler 文字列は _HANDLER として渡され、src/main.nim の
+  # "test".hander do ... と一致させることで処理を振り分ける。
   test:
-    image:
-      name: appImage
-      command:
-        - test
+    handler: test
     events:
       - http:
           path: test
           method: get
+
+# =====================================================================
+# Docker(ECR イメージ)版の構成【旧構成・参考用にコメントアウト】
+# ---------------------------------------------------------------------
+# zip(provided.al2)版へ移行したため未使用。
+# zip 版では scripts フックが nimlang/nim イメージで bootstrap を生成し、
+# package.patterns で bootstrap のみをアップロードするため、ECR は不要になった。
+# ---------------------------------------------------------------------
+# provider:
+#   name: aws
+#   runtime: provided
+#   timeout: 20
+#   region: ap-northeast-1
+#   ecr:
+#     images:
+#       appImage:
+#         path: ./
+#         platform: linux/amd64
+#   stage: ${opt:stage, self:custom.defaultStage}
+#
+# functions:
+#   test:
+#     image:
+#       name: appImage
+#       command:
+#         - test
+#     events:
+#       - http:
+#           path: test
+#           method: get
+# =====================================================================
