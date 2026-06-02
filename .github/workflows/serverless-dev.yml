@@ -5,7 +5,7 @@ on: pull_request
 jobs:
   deploy:
     name: deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     # OIDC で AWS の一時クレデンシャルを取得するために id-token: write が必要。
     permissions:
       id-token: write
